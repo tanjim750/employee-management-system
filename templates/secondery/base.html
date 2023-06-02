@@ -1,0 +1,362 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Employee Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+      .employeeImg{
+          height: 50px;
+          width: 50px;
+          border-radius: 50%;
+        }
+      .btnpadding{
+        padding: 10px;
+      }
+      .selectBox{
+        background-color: rgb(43, 43, 233); 
+        color: aliceblue; 
+        padding: 3px 10px 3px 10px;
+      }
+
+      .applicationBox{
+        width: 100%;
+        height: 700px;
+        background-color: aliceblue;
+        font-size: 20px;
+        padding: 10px;
+        border: none;
+        outline: none;
+      }
+      .applicationBox:focus{
+        border: none;
+      }
+
+      .messageBox{
+        width: 100%;
+        background-color: aliceblue;
+        font-size: 16px;
+        padding: 10px;
+        border: none;
+        outline: none;
+      }
+
+      .btns{
+        font-size: 14px;
+        outline: none;
+        border-radius: 3px;
+        height: auto;
+        padding: 2px 5px 2px 5px;
+        background-color: rgb(240, 240, 240);
+        border-color: rgb(184, 183, 183);
+      }
+      .btns_selected{
+        background-color: rgb(215, 215, 215);
+      }
+    </style>
+  </head>
+  <body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'index' %}">
+          <i class="fa-solid fa-graduation-cap fa-lg"></i> Employee Management System
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+          {% if request.user.is_authenticated %} <!-- check the current user is authenticated or not -->
+
+            {% if "app.employee" in perms %}  <!-- if current user has permission to manage Employee model -->
+              
+              <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'index' %}">
+                    <i class="fa-solid fa-list fa-lg"></i> All Employee
+                  </a>
+                </li>
+                {% if check_attendance_page %} <!-- if the current page is employee attendance page -->
+
+                  
+                    <li class="nav-item">
+                      <a class="nav-link" title="Select a Date"> Date: 
+                        <select name="date1" id="selectDate1" class="selectBox">
+                          <option value="all" selected>All</option>
+                          {% for day in days %}
+                            <option value="{{day}}" {% if default_day1 == day %} selected {% endif %}>{{day}}</option>
+                          {% endfor %}
+                        </select> &nbsp; To &nbsp;
+                        <select name="date2" id="selectDate2" class="selectBox">
+                          <option value="None" selected>None</option>
+                          {% for day in days %}
+                            <option value="{{day}}" {% if default_day2 == day %} selected {% endif %}>{{day}}</option>
+                          {% endfor %}
+                        </select>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" title="Select a Month"> Month: 
+                        <select name="Month1" id="selectMonth1" class="selectBox">
+                          <option value="all">All</option>
+                          {% for month in months %}
+                            <option value="{{month.value}}" {% if month.value == default_month1 %} selected {% endif %} >{{month.month}}</option>
+                          {% endfor %}
+                        </select> &nbsp; To &nbsp;
+                        <select name="Month2" id="selectMonth2" class="selectBox">
+                          <option value="None">None</option>
+                          {% for month in months %}
+                            <option value="{{month.value}}" {% if month.value == default_month2 %} selected {% endif %} >{{month.month}}</option>
+                          {% endfor %}
+                        </select>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" title="Select a Year"> Year:
+                        <select name="Year1" id="selectYear1" class="selectBox">
+                          <option value="all">All</option>
+                          {% for year in years %}
+                            <option value="{{year}}" {% if year == default_year1 %} selected {% endif %}>{{year}}</option>
+                          {% endfor %}
+                        </select>
+                        &nbsp; To &nbsp;
+                        <select name="Year2" id="selectYear2" class="selectBox">
+                          <option value="None" selected>None</option>
+                          {% for year in years %}
+                            <option value="{{year}}" {% if year == default_year2 %} selected {% endif %}>{{year}}</option>
+                          {% endfor %}
+                        </select>
+                      </a>
+                    </li>
+                  
+                {% else %}
+                  {% if index_page %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="?action=add-employee">
+                      <i class="fa-solid fa-plus fa-lg"></i> Add Employee
+                    </a>
+                  </li>
+                  {% endif %}
+                  
+                  {% if todays_attendance_page %}
+                  <li class="nav-item">
+                    <a class="nav-link">
+                      <form method="get" class="d-flex" role="search" id="searchform">
+                        <input name="q" id="searchInput" class="form-control me-2" type="search" placeholder="Search Employee" aria-label="Search">
+                      </form>
+                    </a>
+                  </li>
+                  
+                  {% else %}
+                    <li class="nav-item">
+                      <a class="nav-link" href="/today-attendance">
+                        <i class="fa-solid fa-clock fa-lg"></i> Today's Attendance
+                      </a>
+                    </li>
+                    
+                  {% endif %}
+
+                  {% if not leave_requests_page %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'leave-requests' %}">
+                      <i class="fa-solid fa-envelope fa-lg"></i> Leave Requests
+                    </a>
+                  </li>
+                  {% endif %}
+                {% endif %} <!-- if the current page is employee attendance page (end) -->
+              </ul>
+              
+
+            {% else %} <!-- if current user has permission to manage Employee model (else) --> 
+            
+            
+              {% if checkedIn is None %} <!-- if current user is not select as present yet -->
+                
+                <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                  {% if DateTimeNow.time < lateInTimeLimit %} <!-- if employee late enter time is not over -->
+                    <form action="/mark-attendance" method="post" class="nav-link" >
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="enter">
+                      <input type="submit" id="submitbtn" style="display: none;">
+                      <i class="fa-solid fa-arrow-right fa-lg"></i> <label for="submitbtn">Check me as entered</label>
+                    </form>
+                  {% else %} <!-- if employee late enter time is not over (else) -->
+                    <a class="nav-link">
+                      <i class="fa-solid fa-clock fa-lg"></i> It's {{DateTimeNow.time|time:"h:i"}} so You are counted as Absent
+                    </a>
+                  {% endif %} <!-- if employee late enter time is not over (end) -->
+                </li>
+                </ul>
+                
+                <div class="nav justify-content-end">
+                  <a class="navbar-brand" href="{% url 'index' %}">
+                    <img src="{{request.user.employee.image.url}}" alt="image" style="height: 40px; width: 40px; border-radius: 50%;"> {{request.user.first_name}}
+                  </a>
+                </div>
+              {% else %} <!-- if current user is not select as present yet (else) -->
+
+                {% if not checkedIn.attend %} <!-- if current user is not selected as attend yet -->
+                
+                  <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                      <a class="nav-link">
+                        <i class="fa-solid fa-angle-double-right fa-lg"></i> Checked In: {{checkedIn.check_in|time:"h:i:s A"}}
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link">
+                        <i class="fa-solid fa-clock fa-lg"></i> Working Period: <span id="liveCountWorkingPeriod"></span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      {% if working_time >= minimum_time %}  <!-- if working time more then 30 mins -->
+                        <form action="/mark-attendance" method="post" class="nav-link" >
+                          {% csrf_token %}
+                          <input type="hidden" name="action" value="out">
+                          <input type="submit" id="submitbtn" style="display: none;">
+                          <i class="fa-solid fa-arrow-left fa-lg"></i> <label for="submitbtn">Check me as out</label>
+                        </form>
+                      
+                      {% endif %}  <!-- if working time more then 30 mins end -->
+                    </li>
+                  </ul>
+                
+            
+                {% else %} <!-- if current user is not selected as attend yet (end) -->
+
+                  <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                      <a class="nav-link">
+                        <i class="fa-solid fa-angle-double-right fa-lg"></i> Checked In: {{checkedIn.check_in|time:"h:i:s A"}}
+                      </a>
+                    </li>
+
+                    <li class="nav-item">
+                      <a class="nav-link">
+                        <i class="fa-solid fa-angle-double-left fa-lg"></i> Checked Out: {{checkedIn.check_out|time:"h:i:s A"}}
+                      </a>
+                    </li>
+
+                    <li class="nav-item">
+                      <a class="nav-link" >
+                        <i class="fa-solid fa-clock fa-lg"></i> Working Period: {{checkedIn.working_period|time:"H:i:s"}}
+                      </a>
+                    </li>
+
+                    <li class="nav-item">
+                      <a class="nav-link">
+                        <i class="fa-solid fa-child fa-lg"></i> Counted as Present
+                      </a>
+                    </li>
+                  </ul>
+              
+                {% endif %} <!-- if current user is not selected as attend yet (end) -->
+
+                  <div class="nav justify-content-end">
+                    <a class="navbar-brand" href="{% url 'index' %}">
+                      <img src="{{request.user.employee.image.url}}" alt="image" style="height: 40px; width: 40px; border-radius: 50%;"> {{request.user.first_name}}
+                    </a>
+                  </div>
+              {% endif %} <!-- if current user is not select as present yet (end) -->
+            
+            
+            {% endif %} <!-- if current user has permission to manage Employee model (end) -->
+            
+            
+              
+                <a class="nav-link" href="{% url 'logout' %}" style="font-size: 20px;">
+                  <i class="fa-solid fa-sign-out fa-lg"></i> Logout
+                </a>
+              
+          {% endif %} <!-- check the current user is authenticated or not (end) -->
+        </div>
+      </div>
+    </nav>
+    <div class="container-fluid">
+      {% block body %}
+      {% endblock %}
+    </div>
+    <footer class="mt-auto mb-4">
+      <div class="text-center">
+        <span>
+          <!-- Copyright &copy; <script>document.write(new Date().getFullYear())</script> Bob's Programming Academy. -->
+        </span>
+      </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    
+
+    {% if 'app.employee' in perms %}  <!-- if current user has permission to download Employee Sheet -->
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+      <script>
+      $(document).ready(function() {
+        function checkDownloadStatus() {
+          console.log("trying");
+          if (document.cookie.includes('downloaded=true')) {
+            // Change the button text to "Downloaded"
+            document.getElementById('downloadBtnText').innerText = "Downloaded"
+          } else {
+            // Retry after 1 second
+            setTimeout(checkDownloadStatus, 1000);
+          }
+        }
+
+        $('#downloadBtn').on('click', function() {
+          // Change the button text to "Downloading..."
+          document.getElementById('downloadBtnText').innerText = "Downloading...";
+
+          // Start checking for the cookie
+          checkDownloadStatus();
+        });
+      });
+
+
+      </script>
+    
+    {% else %}
+
+    {% if not checkedIn.attend %} <!-- if current user is not selected as attend yet -->
+    <script>
+
+      function parseTime(){
+        var timeValue = "{{working_time}}";
+        console.log(timeValue);
+
+        var splitTime = timeValue.split(":");
+        var hours = parseInt(splitTime[0]);
+        var minutes = parseInt(splitTime[1]);
+        var seconds = parseInt(splitTime[2]);
+
+        function liveTimeCount(){
+          seconds++;
+          if (seconds >= 60) {
+            minutes++;
+            seconds = 0;
+          }
+          if (minutes >= 60) {
+            hours++;
+            minutes = 0;
+          }
+
+          document.getElementById("liveCountWorkingPeriod").textContent = ("0" + hours).slice(-2)+":"+("0" + minutes).slice(-2)+":"+("0" + seconds).slice(-2);
+        }
+
+        setInterval(liveTimeCount,1000)
+      }
+
+      parseTime()
+
+    </script>
+    {% endif %} <!-- if current user is not selected as attend yet (end) -->
+      
+    {% endif %} <!-- if current user has permission to download Employee Sheet (end) -->
+
+      {% block script %}
+      
+      {% endblock %}
+ 
+  </body>
+</html>

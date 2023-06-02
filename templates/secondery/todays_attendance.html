@@ -1,0 +1,130 @@
+{% extends "secondery/base.html" %}
+{% load filters %}
+{% block body %}
+<h3 class="m-4">Employee Attendance for Today <a href="download_todays_attendance_sheet" id="downloadBtn" class="btn btn-secondary"><i class="fa-solid fa-download fa-lg"></i> | <span id="downloadBtnText">Attendance Sheet</span></a></h3>
+
+<div class="row">
+  <div class="col-12">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Number</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Attd. Time</th>
+                  <th scope="col">Working Period</th>
+                  <th scope="col">Leave Time</th>
+                  <th scope="col">Early Attd.</th>
+                  <th scope="col">Late Attd.</th>
+                  <th scope="col">Early Leave</th>
+                  <th scope="col">Late Leave</th>
+                  <th scope="col"></th>
+
+                </tr>
+              </thead>
+              <tbody>
+                {% if attendances %}
+                  {% for attd in attendances %}
+                    
+                        <tr>
+                            <th scope="row">
+                              <img src="{{attd.user.employee.image.url}}" alt="profile" class="employeeImg">
+                            </th>
+                            <td>{{attd.user.first_name}} {{attd.user.last_name}}</td>
+                            <td>{{attd.user.employee.number}}</td>
+                            <td>{{attd.user.email}}</td>
+                            <td>{{attd.check_in|time:"h:i:s"}}</td>
+                            <td>{% if attd.attend %} {{attd.working_period|time:"H:i:s"}} {% else %} <span id="countLiveTime">{{attd.check_in|liveTimeCount}}</span> {% endif %} </td>
+                            <td>{% if attd.attend %}{{attd.check_out|time:"h:i:s A"}} {% else %} Working {% endif %}</td>
+                            <td>{% if attd.early_in %} <b style="color: white; padding: 5px; background-color: green;">{{attd.early_in|time:"H:i:s"}}</b>  {% else %} No {%endif%}</td>
+                            <td>{% if attd.late_in %} <b style="color: white; padding: 5px; background-color: red;">{{attd.late_in|time:"H:i:s"}}</b> {% else %} No {%endif%}</td>
+                            <td>{% if attd.early_out %} <b style="color: white; padding: 5px; background-color: red;">{{attd.early_out|time:"H:i:s"}}</b> {% else %} No {%endif%}</td>
+                            <td>{% if attd.late_out %} <b style="color: white; padding: 5px; background-color: green;">{{attd.late_out|time:"H:i:s"}}</b> {% else %} No {%endif%}</td>
+                            <td><a href="/check-attendance?e={{attd.user.username}}" class="btn btn-success"><b>Attendance</b></a></td>
+                        </tr>
+
+                  {% endfor %}
+                {% else %}
+                
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <h3 class="m-3"> No Records for Attendance</h3>
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+    </div>
+    
+
+    </textarea>
+  </div>
+
+<script>
+
+  // add download button link
+//   var downloadBtn = document.getElementById("downloadBtn");
+//   downloadLink = "download-attendace-sheet?e="+username+"&day1="+date1Select.value+"&day2="+date2Select.value+"&month1="+month1Select.value+"&month2="+month2Select.value+"&year1="+year1Select.value+"&year2="+year2Select.value ;
+//   downloadBtn.setAttribute('href', downloadLink);
+
+
+  // count live working time 
+
+  function liveTimeCount(){
+        var timeValues = document.querySelectorAll("#countLiveTime");
+
+        timeValues.forEach(function(element) {
+              // Get the initial time value from the <span> element's text
+              var initialTime = element.textContent;
+
+              // Split the initial time into hours, minutes, and seconds
+              var timeParts = initialTime.split(':');
+              var hours = parseInt(timeParts[0]);
+              var minutes = parseInt(timeParts[1]);
+              var seconds = parseInt(timeParts[2]);
+
+              // Increment the time by 1 second
+              seconds++;
+              if (seconds >= 60) {
+                seconds = 0;
+                minutes++;
+                if (minutes >= 60) {
+                  minutes = 0;
+                  hours++;
+                }
+              }
+
+
+              var updatedTime = ("0" + hours).slice(-2)+":"+("0" + minutes).slice(-2)+":"+("0" + seconds).slice(-2);
+              element.textContent = updatedTime;
+        });
+        
+
+      }
+
+      setInterval(liveTimeCount,1000)
+
+
+      // search employee
+      var searchInput = document.getElementById("searchInput").value;
+      var searchForm = document.getElementById("searchform")
+      var str = "hhsdh"
+      if (searchInput.length > 2) {
+        searchForm.submit();
+      }
+
+      // get value of q parameter
+      try {
+        var url = window.location.href;
+        var q_parameter = new URLSearchParams(url.split("?")[1]);
+        var query_value = q_parameter.get("q");
+        document.getElementById("searchInput").value = query_value;
+      } catch (error) {
+        
+      }
+</script>
+
+{% endblock %}

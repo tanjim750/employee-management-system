@@ -1,0 +1,133 @@
+{% extends "secondery/base.html" %}
+{% load static %}
+{% block body %}
+  <h3 class="text-center m-4">
+    {% if employee %} Edit Emplpyee {% else %} Add Employee {% endif %}</h3>
+  {% if success %}
+    <div class="alert alert-success" role="alert">
+      {{success_msg}}
+      <a href="{% url 'index' %}" class="alert-link">Go to Home Page.</a>
+    </div>
+  {% else %}
+    <div class="row justify-content-center">
+      <div class="col-6">
+        <div class="card bg-light mb-3">
+          <div class="card-header">
+            <i class="fa-solid fa-address-card fa-lg"></i>
+            {% if employee %} {{employee.first_name}} {{employee.last_name}} {% else %} Employee Registration {% endif %}
+          </div>
+          <div class="card-body">
+            <form action="{% url 'index' %}" method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+
+              {% if employee %}
+              <input type="hidden" name="action" value="edit">
+              <input type="hidden" name="id" value="{{employee.username}}">
+              {% else %}
+              <input type="hidden" name="action" value="addnew">
+              {% endif %}
+
+              <input type="file" name="image" id="image" {% if not employee %}required{% endif %} style="display: none;">
+                <div class="nav justify-content-center text-center">
+                  <label for="image" style="height: 170px; width: 150px; background-color:rgb(234, 221, 221); margin-bottom: 20px;">
+                    <img src="{% if employee %} {{employee.employee.image.url}} {% else %} {% static '/images/user.png' %} {% endif %} " alt="select an image" height="100%" width="100%">
+                  </label>
+                </div>
+
+              <div class="row">
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">First Name</label> 
+                    <input type="name" name="fname" class="form-control" id="fname" placeholder="Jone" required>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Last Name</label> 
+                    <input type="name" name="lname" class="form-control" id="lname" placeholder="doe" required>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Email Address</label> 
+                    <input type="email" name="email" class="form-control" id="email" placeholder="Jone@example.com" required>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Phone Number</label> 
+                    <input type="tel" name="number" class="form-control" id="number" placeholder="0987654321" required>
+                  </div>
+                </div>
+                
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Position</label> 
+                    <input type="text" name="position" class="form-control" id="position" placeholder="Enter Position" required>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Department</label> 
+                    <input type="text" name="department" class="form-control" id="department" placeholder="enter Department" required>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Date of Birth</label> 
+                    <input type="date" {% if employee %} value="{{employee.employee.dof|date:'Y-m-d'}}" {% endif %} name="dof" class="form-control" id="dof" placeholder="Enter Date of birth" required>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Address</label> 
+                    <input type="text" name="address" class="form-control" id="address" placeholder="Employee Adddress" required>
+                  </div>
+                </div>
+
+            </div>
+              <button type="submit" class="btn btn-primary">Add</button>
+              <a href="{% url 'index' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block script %}
+<script>
+  window.addEventListener('load', function() {
+  document.querySelector('input[type="file"]').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+          var img = document.querySelector('img');
+          img.onload = () => {
+              URL.revokeObjectURL(img.src);  // no longer needed, free memory
+          }
+
+          img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+      }
+  });
+});
+
+{% if employee %}
+  document.getElementById("fname").value = "{{employee.first_name}}"
+  document.getElementById("lname").value = "{{employee.last_name}}"
+  document.getElementById("email").value = "{{employee.email}}"
+  document.getElementById("position").value = "{{employee.employee.position}}"
+  document.getElementById("department").value = "{{employee.employee.department}}"
+  document.getElementById("address").value = "{{employee.employee.address}}"
+  document.getElementById("number").value = "{{employee.employee.number}}"
+
+  
+{% endif %}
+</script>
+{% endblock %}

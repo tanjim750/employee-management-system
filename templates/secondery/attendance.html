@@ -1,0 +1,207 @@
+{% extends "secondery/base.html" %}
+{% load filters %}
+{% block body %}
+<h3 class="m-4">Employee Attendance <a href="" id="downloadBtn" class="btn btn-secondary"><i class="fa-solid fa-download fa-lg"></i> | <span id="downloadBtnText">Attendance Sheet</span></a></h3>
+<div class="row justify-content-center">
+  <div class="col-6">
+    <div class="card bg-light mb-3">
+      <div class="card-header">
+        <i class="fa-solid fa-address-card fa-lg"></i>
+        Employee Information
+      </div>
+      <div class="card-body">
+        <div for="image" style="height: 170px; width: auto; margin-bottom: 20px; border-radius: 25px; display: flex;">
+          <img src="{{user.employee.image.url}}" alt="select an image" height="170px" width="150px">
+          <div class="row" style="margin-top: 10px; margin-left: 10px; width: 50%;">
+            <div class="col-12">
+              Name: <b style="color: rgb(70, 88, 98);">{{user.first_name}} {{user.last_name}}</b> <br>
+              Number: <b style="color: rgb(70, 88, 98);">{{user.employee.number}}</b> <br>
+              Position: <b style="color: rgb(70, 88, 98);">{{user.employee.position}}</b> <br>
+              Department: <b style="color: rgb(70, 88, 98);">{{user.employee.department}}</b> <br>
+              Total Attendance: <b style="color: rgb(70, 88, 98);">{{total_attendance}}</b> <br>
+              Total Leave: <b style="color: rgb(70, 88, 98);">{{user.employee.total_leave}}</b> <br>
+              Total Working Days: <b style="color: rgb(70, 88, 98);">{{total_working_days}}</b> <br>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 10px; margin-left: 20px;">
+            <div class="col-12">
+              Email: <b style="color: rgb(70, 88, 98);">{{user.email}}</b> <br>
+              Address: <u style="color: rgb(70, 88, 98);">{{user.employee.address}}</u> <br>
+              Total early In: <b style="color: rgb(70, 88, 98);">{{totalEarlyInTime}}</b> <br>
+              Total Late In: <b style="color: rgb(70, 88, 98);">{{totalLateInTime}}</b> <br>
+              Total early Out: <b style="color: rgb(70, 88, 98);">{{totalEarlyOutTime}}</b> <br>
+              Total Late Out: <b style="color: rgb(70, 88, 98);">{{totalLateOutTime}}</b> <br>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">In Time</th>
+                  <th scope="col">Working Period</th>
+                  <th scope="col">Out Time</th>
+                  <th scope="col">Early In</th>
+                  <th scope="col">Late In</th>
+                  <th scope="col">Early Out</th>
+                  <th scope="col">Late Out</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                {% if attendances %}
+                  {% for attd in attendances %}
+                    {% if forloop.counter0 == 0 %}
+                      <tr>
+                        <td colspan="8" class="text-center"><h6 style="padding: 10px; background-color: aquamarine;">{{attd.day|date:"M, Y"}}</h6></td>
+                      </tr>
+                    {% else %}
+                      {% if forloop.counter0|getMonth:attendances %}
+                        <tr>
+                          <td colspan="8" class="text-center"><h6 style="padding: 10px; background-color: aquamarine;">{{attd.day|date:"M, Y"}}</h6></td>
+                        </tr>
+                      {% endif %}
+                    {% endif %}
+                    
+                      {% if attd.status == "present" %}
+                        <tr>
+                            <td>{{attd.day}}</td>
+                            <td>{{attd.check_in|time:"h:i:s"}}</td>
+                            <td>{% if attd.attend %} {{attd.working_period|time:"H:i:s"}} {% else %} <span id="countLiveTime">{{attd.check_in|liveTimeCount}}</span> {% endif %} </td>
+                            <td>{% if attd.attend %}{{attd.check_out|time:"h:i:s A"}} {% else %} Working {% endif %}</td>
+                            <td>{% if attd.early_in %} <b style="color: white; padding: 5px; background-color: green;">{{attd.early_in|time:"H:i:s"}}</b>  {% else %} No {%endif%}</td>
+                            <td>{% if attd.late_in %} <b style="color: white; padding: 5px; background-color: red;">{{attd.late_in|time:"H:i:s"}}</b> {% else %} No {%endif%}</td>
+                            <td>{% if attd.early_out %} <b style="color: white; padding: 5px; background-color: red;">{{attd.early_out|time:"H:i:s"}}</b> {% else %} No {%endif%}</td>
+                            <td>{% if attd.late_out %} <b style="color: white; padding: 5px; background-color: green;">{{attd.late_out|time:"H:i:s"}}</b> {% else %} No {%endif%}</td>
+                        </tr>
+                      {% endif %}
+
+                      {% if attd.status == "holiday" %}
+                        <tr >
+                          <td>{{attd.day}}</td>
+                          <td colspan="7" class="text-center">
+                            <b style="color: white; padding: 5px; background-color: rgb(122, 135, 178);">Public Holiday for {{attd.name}}</b>
+                          </td>
+                        </tr>
+                      {% endif %}
+
+                      {% if attd.status == "absent" %}
+                        <tr>
+                          <td>{{attd.day}}</td>
+                          <td colspan="7" class="text-center">
+                            <b style="color: white; padding: 5px; background-color: red;">Absent</b>
+                          </td>
+                        </tr>
+                      {% endif %}
+
+                  {% endfor %}
+                {% else %}
+                
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <h3 class="m-3"> No Records for Attendance</h3>
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+
+<!-- get the date month year value from select inputs (codes in base.html) and assign it to the form         -->
+<div style="display: none;">
+  <form action="" id="formBox" method="post"> {% csrf_token %}
+    <input type="hidden" name="day1"  id="inputDate1">
+    <input type="hidden" name="day2"  id="inputDate2">
+    <input type="hidden" name="month1" id="inputMonth1">
+    <input type="hidden" name="month2" id="inputMonth2">
+    <input type="hidden" name="year1" id="inputYear1">
+    <input type="hidden" name="year2" id="inputYear2">
+
+  </form>
+</div>
+
+<script>
+  // <!-- submit form whenever a select input option is changed -->
+    // Get the select elements and form element
+    const date1Select = document.getElementById('selectDate1');
+    const date2Select = document.getElementById('selectDate2');
+    const month1Select = document.getElementById('selectMonth1');
+    const month2Select = document.getElementById('selectMonth2');
+    const year1Select = document.getElementById('selectYear1');
+    const year2Select = document.getElementById('selectYear2');
+    const formElement = document.getElementById('formBox');
+
+    // Function to handle form submission
+    function handleSubmit(event) {
+      event.preventDefault(); // Prevent the default form submission
+      document.getElementById('inputDate1').value = document.getElementById('selectDate1').value;
+      document.getElementById('inputMonth1').value = document.getElementById('selectMonth1').value;
+      document.getElementById('inputDate2').value = document.getElementById('selectDate2').value;
+      document.getElementById('inputMonth2').value = document.getElementById('selectMonth2').value;
+      document.getElementById('inputYear1').value = document.getElementById('selectYear1').value;
+      document.getElementById('inputYear2').value = document.getElementById('selectYear2').value;
+      formElement.submit(); // Submit the form
+    }
+
+    // Attach event listeners to select elements
+    date1Select.addEventListener('change', handleSubmit);
+    month1Select.addEventListener('change', handleSubmit);
+    date2Select.addEventListener('change', handleSubmit);
+    month2Select.addEventListener('change', handleSubmit);
+    year1Select.addEventListener('change', handleSubmit);
+    year2Select.addEventListener('change', handleSubmit);
+
+  // Get the URL
+  var url = window.location.href;
+
+  // Get the value of the parameter "e"
+  var params = new URLSearchParams(url.split('?')[1]);
+  var username = params.get('e');
+
+  // add download button link
+  var downloadBtn = document.getElementById("downloadBtn");
+  downloadLink = "download-attendace-sheet?e="+username+"&day1="+date1Select.value+"&day2="+date2Select.value+"&month1="+month1Select.value+"&month2="+month2Select.value+"&year1="+year1Select.value+"&year2="+year2Select.value ;
+  downloadBtn.setAttribute('href', downloadLink);
+
+
+  // count live working time 
+
+  function parseTime(){
+        var timeValue = document.getElementById("countLiveTime").textContent;
+        console.log(timeValue);
+
+        var splitTime = timeValue.split(":");
+        var hours = parseInt(splitTime[0]);
+        var minutes = parseInt(splitTime[1]);
+        var seconds = parseInt(splitTime[2]);
+        if (hours >= 12) {
+          hours = hours - 12
+        }
+        function liveTimeCount(){
+          seconds++;
+          if (seconds >= 60) {
+            minutes++;
+            seconds = 0;
+          }
+          if (minutes >= 60) {
+            hours++;
+            minutes = 0;
+          }
+
+          document.getElementById("countLiveTime").textContent = ("0" + hours).slice(-2)+":"+("0" + minutes).slice(-2)+":"+("0" + seconds).slice(-2);
+        }
+
+        setInterval(liveTimeCount,1000)
+      }
+
+      parseTime()
+</script>
+
+{% endblock %}

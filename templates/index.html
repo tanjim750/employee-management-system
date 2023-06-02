@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+  {% load static %}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
+    <title>Employee Attendance</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .header{
+            background-color: rgb(225, 235, 243);
+            height: 50px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .form-box{
+            
+            border-radius: 10px;
+            background-color: aliceblue;
+            
+            padding: 50px;
+        }
+
+        .employeeImg{
+          height: 50px;
+          width: 50px;
+          border-radius: 25px;
+        }
+    </style>
+  </head>
+  <body class="p-3 m-0 border-0 bd-example">
+    <div class="container">
+    
+    <!-- As a heading -->
+        
+    <nav class="header text-center mb-4">
+        <h1 style="text-align: center;">Employee Attendance</h1>
+    </nav>
+
+     {% if request.user.is_superuser %} <!--first if statement -->
+      <!-- display if user is uperuser start  -->
+
+        <!-- Button trigger modal -->
+        <div class="nav justify-content-center">
+            <button type="button" class="btn btn-primary" style="padding: 10px;" data-bs-toggle="modal" data-bs-target="#addemployee">
+              <strong>
+                Add New Employee
+              </strong>
+            </button>
+        </div>
+
+
+      <!-- Modal -->
+      <div class="modal fade" id="addemployee" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content">
+            
+            <div class="modal-body">
+              <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+                <input type="hidden" name="action" value="addnew">
+
+                <input type="file" name="image" id="image" required style="display: none;">
+                <div class="nav justify-content-center text-center">
+                  <label for="image" style="height: 170px; width: 150px; background-color:aliceblue; margin-bottom: 20px;">
+                    <img src="{% static '/images/user.png' %}" alt="select an image" height="100%" width="100%">
+                  </label>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">First Name</label> 
+                        <input type="name" name="fname" class="form-control" id="exampleFormControlInput1" placeholder="Jone" required>
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Last Name</label> 
+                        <input type="name" name="lname" class="form-control" id="exampleFormControlInput1" placeholder="doe" required>
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Email Address</label> 
+                        <input type="email" name="email" class="form-control" id="exampleFormControlInput1" placeholder="Jone@example.com" required>
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Phone Number</label> 
+                        <input type="tel" name="number" class="form-control" id="exampleFormControlInput1" placeholder="0987654321" required>
+                      </div>
+                    </div>
+                    
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Position</label> 
+                        <input type="text" name="position" class="form-control" id="exampleFormControlInput1" placeholder="Enter Position" required>
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Department</label> 
+                        <input type="text" name="department" class="form-control" id="exampleFormControlInput1" placeholder="enter Department" required>
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Date of Birth</label> 
+                        <input type="date" name="dof" class="form-control" id="exampleFormControlInput1" placeholder="Enter Date of birth" required>
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="mb-4">
+                        <label for="exampleFormControlInput1" class="form-label">Address</label> 
+                        <input type="text" name="address" class="form-control" id="exampleFormControlInput1" placeholder="Employee Adddress" required>
+                      </div>
+                    </div>
+
+                </div>
+
+                <div class="nav justify-content-end">
+                  <button type="submit" class="btn btn-primary" style="padding: 10px;"><strong>Add Employee</strong></button>
+                </div>
+                
+            </form>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+    
+    </div>
+    <!-- End model Code -->
+
+    <table class="table mt-5">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Name</th>
+          <th scope="col">Position</th>
+          <th scope="col">Department</th>
+          <th scope="col">Phone Number</th>
+          <th scope="col">Email Address</th>
+          <th scope="col">Date of birth</th>
+          <th scope="col">Address</th>
+          <th scope="col">Date of join</th>
+          <th scope="col">Total Att.</th>
+          <th scope="col">Total Leave</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for employe in employees %} <!-- first for loop (itaret employess) -->
+
+        <tr>
+          <th scope="row">
+            <img src="{{employe.employee.image.url}}" alt="profile" class="employeeImg">
+          </th>
+          <td>{{employe.first_name}} {{employe.last_name}}</td>
+          <td>{{employe.employee.position}}</td>
+          <td>{{employe.employee.department}}</td>
+          <td>{{employe.employee.number}}</td>
+          <td>{{employe.email}}</td>
+          <td>{{employe.employee.dof}}</td>
+          <td>{{employe.employee.address}}</td>
+          <td>{{employe.date_joined|date:"d M Y"}}</td>
+          <td>{{employe.employee.total_attd}}</td>
+          <td>{{employe.employee.total_leave}}</td>
+          <td>
+            <a href="" data-bs-toggle="modal" data-bs-target="#editemployee{{employe.username}}">Edit</a> 
+            <a href="?action=delete&id={{employe.username}}" onclick="checker()">Delete</a>
+          </td>
+        </tr>
+
+
+        <!-- edit employee details model box start -->
+
+        <div class="modal fade" id="editemployee{{employe.username}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+              
+              <div class="modal-body">
+                <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+
+                  <input type="hidden" name="action" value="edit">
+                  <input type="hidden" name="id" value="{{employe.username}}">
+
+                  <input type="file" name="image" id="editimage{{employe.username}}" style="display: none;">
+                  <div class="nav justify-content-center text-center">
+                    <label for="editimage{{employe.username}}" style="height: 170px; width: 150px; background-color: aliceblue; margin-bottom: 20px;">
+                      <img src="{{employe.employee.image.url}}" id="disImg{{employe.username}}" alt="select an image" height="100%" width="100%">
+                    </label>
+                  </div>
+                  <div class="row">
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">First Name</label> 
+                          <input type="name" name="fname" value="{{employe.first_name}}" class="form-control" id="exampleFormControlInput1" placeholder="Jone" required>
+                        </div>
+                      </div>
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Last Name</label> 
+                          <input type="name" name="lname" value="{{employe.last_name}}" class="form-control" id="exampleFormControlInput1" placeholder="doe" required>
+                        </div>
+                      </div>
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Email Address</label> 
+                          <input type="email" name="email" value="{{employe.email}}" class="form-control" id="exampleFormControlInput1" placeholder="Jone@example.com" required>
+                        </div>
+                      </div>
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Phone Number</label> 
+                          <input type="tel" name="number" value="{{employe.employee.number}}" class="form-control" id="exampleFormControlInput1" placeholder="0987654321" required>
+                        </div>
+                      </div>
+                      
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Position</label> 
+                          <input type="text" name="position" value="{{employe.employee.position}}" class="form-control" id="exampleFormControlInput1" placeholder="Enter Position" required>
+                        </div>
+                      </div>
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Department</label> 
+                          <input type="text" name="department" value="{{employe.employee.department}}" class="form-control" id="exampleFormControlInput1" placeholder="enter Department" required>
+                        </div>
+                      </div>
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Date of Birth</label> 
+                          <input type="date" name="dof" value="{{employe.employee.dof|date:'Y-m-d'}}" class="form-control" id="exampleFormControlInput1" placeholder="Enter Date of birth" required>
+                        </div>
+                      </div>
+  
+                      <div class="col-6">
+                        <div class="mb-4">
+                          <label for="exampleFormControlInput1" class="form-label">Address</label> 
+                          <input type="text" name="address" value="{{employe.employee.address}}" class="form-control" id="exampleFormControlInput1" placeholder="Employee Adddress" required>
+                        </div>
+                      </div>
+  
+                  </div>
+  
+                  <div class="nav justify-content-end">
+                    <button type="submit" class="btn btn-primary" style="padding: 10px;"><strong>Edit Details</strong></button>
+                  </div>
+                  
+              </form>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+        <!-- box ended -->
+        
+
+        {% endfor %} <!-- first for loop (itaret employess) -->
+        
+        
+      </tbody>
+    </table>
+
+    <!-- display if user is uperuser end  -->
+
+    {% else %} <!-- display if user is not uperuser start  -->
+    
+    <div class="nav justify-content-center">
+      {% if checkedIn is None %}
+      <form action="/mark-attendance" method="post">{% csrf_token %}
+        <input type="hidden" name="action" value="enter">
+        <button style="margin-right: 10px;" type="submit" class="btn btn-primary" style="padding: 10px;" data-bs-toggle="modal" data-bs-target="#addemployee">
+          <strong>
+            Check me as entered
+          </strong>
+        </button>
+      </form>
+      {% else %}
+
+      {% if not checkedIn.attend %}
+      <form action="/mark-attendance" method="post">{% csrf_token %}
+        <input type="hidden" name="action" value="out">
+        <button style="margin-right: 10px;" type="submit" class="btn btn-primary" style="padding: 10px;" data-bs-toggle="modal" data-bs-target="#addemployee">
+          <strong>
+            Check me as out
+          </strong>
+        </button>
+      </form>
+      {% else %}
+      <h5>Checked In: {{checkedIn.check_in|time:"h:i:s A"}} | &nbsp;</h5>
+      <h5>Checked Out: {{checkedIn.check_out|time:"h:i:s A"}} | &nbsp;</h5>
+      <h5>Working Period: {{checkedIn.working_period|time:"H:i:s"}} | &nbsp;</h5>
+
+        <h4 style="color: green;">You are counted as present</h4>
+
+      {% endif %}
+
+      {% endif %}
+    </div>
+
+    </div> <!-- container div end tag  -->
+
+    <table class="table mt-5">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Name</th>
+          <th scope="col">Position</th>
+          <th scope="col">Department</th>
+          <th scope="col">Phone Number</th>
+          <th scope="col">Email Address</th>
+          <th scope="col">Date of birth</th>
+          <th scope="col">Address</th>
+          <th scope="col">Date of join</th>
+          <th scope="col">Total Att.</th>
+          <th scope="col">Total Leave</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <th scope="row">
+            <img src="{{employe.employee.image.url}}" alt="profile" class="employeeImg">
+          </th>
+          <td>{{employe.first_name}} {{employe.last_name}}</td>
+          <td>{{employe.employee.position}}</td>
+          <td>{{employe.employee.department}}</td>
+          <td>{{employe.employee.number}}</td>
+          <td>{{employe.email}}</td>
+          <td>{{employe.employee.dof}}</td>
+          <td>{{employe.employee.address}}</td>
+          <td>{{employe.date_joined|date:"d M Y"}}</td>
+          <td>{{employe.employee.total_attd}}</td>
+          <td>{{employe.employee.total_leave}}</td>
+          
+        </tr>
+
+      </tbody>
+    </table>
+
+
+
+    {% endif %} <!--first if statement -->
+
+    <script>
+      window.addEventListener('load', function() {
+      document.querySelector('input[type="file"]').addEventListener('change', function() {
+          if (this.files && this.files[0]) {
+              var img = document.querySelector('img');
+              img.onload = () => {
+                  URL.revokeObjectURL(img.src);  // no longer needed, free memory
+              }
+
+              img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+          }
+      });
+    });
+
+
+    function checker(){
+      var result = confirm("Are you are?\nYou want to delete the emlpoyee")
+
+      if (result == false) {
+        event.preventDefault();
+      }
+    }
+
+    
+    </script>
+  </body>
+</html>

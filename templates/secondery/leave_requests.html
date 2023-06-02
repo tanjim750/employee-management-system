@@ -1,0 +1,125 @@
+{% extends "secondery/base.html" %}
+{% load filters %}
+{% block body %}
+<h3 class="m-4">Leave Requests 
+  <div class="btn-group">
+    <a href="?view=today" class="btn btn-secondary btns {% if view_today %} btns_selected {% endif %}">Today</a>
+    <a href="?view=all" class="btn btn-secondary btns {% if view_all %} btns_selected {% endif %}">All</a>
+  </div>
+</h3>
+
+<div class="row">
+  <div class="col-12">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Number</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Total Attd.</th>
+                  <th scope="col">Total Leave</th>
+                  <th scope="col">Last Leave Approved</th>
+                  <th scope="col">Total Leave Requests</th>
+                  <th scope="col">Total Leave Approved</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if leave_requests %}
+                  {% for req in leave_requests %}
+                    
+                        <tr>
+                            <th scope="row">
+                              <img src="{{req.user.employee.image.url}}" alt="profile" class="employeeImg">
+                            </th>
+                            <td>{{req.user.first_name}} {{req.user.last_name}}</td>
+                            <td>{{req.user.employee.number}}</td>
+                            <td>{{req.user.email}}</td>
+                            <td>{{req.user.employee.total_attd}}</td>
+                            <td>{{req.user.employee.total_leave}}</td>
+                            <td>{{req|last_leave}}</td>
+                            <td>{{req|total_leave_requests}}</td>
+                            <td>{{req|total_approved}}</td>
+                            <td><a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#applicationBox{{forloop.counter}}"><b>View</b></a></td>
+                        </tr>
+
+                        <!-- Modal box for application -->
+                        <div class="modal fade" id="applicationBox{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                              <div class="modal-body">
+                                  <textarea name="application" class="applicationBox" placeholder="{{application}}" readonly>{{req.application}}</textarea><br>
+
+                                  <form action="" method="post" id="formBox" style="margin-top: 15px;">{% csrf_token %}
+                                    <input type="hidden" id="action" name="action" value="approve">
+                                    <input type="hidden" name="id" value="{{req.id}}" >
+                                    <div class="row">
+                                      <div class="col-6">
+                                        <div class="mb-3">
+                                          <label for="exampleFormControlInput1" class="form-label">Leave Period (Starting Date)</label>
+                                          <input type="date" name="startingDate" class="form-control" id="exampleFormControlInput1" required>
+                                        </div>
+                                      </div>
+                                      <div class="col-6">
+                                        <div class="mb-3">
+                                          <label for="exampleFormControlInput1" class="form-label">Ending date (Optional)</label>
+                                          <input type="date" name="endingDate" class="form-control" id="exampleFormControlInput1">
+                                        </div>
+                                      </div>
+
+                                      <div class="col-12">
+                                        <div class="mb-3">
+                                          <label for="exampleFormControlInput1" class="form-label">Message for employee (Optional)</label>
+                                          <textarea name="message" id="" class="messageBox" rows="5" placeholder="White your message"></textarea>
+                                        </div>
+                                      </div>
+
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cencel</button>
+                                    <button type="button" class="btn btn-danger" id="reject" onclick="Reject()">Reject</button>
+                                    <button type="submit" class="btn btn-success" id="approve" >Approve</button>
+                                  </form>
+                              </div>
+                              
+                              
+                            </div>
+                          </div>
+                        </div>
+
+                  {% endfor %}
+                {% else %}
+                
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <h3 class="m-3"> No Records for Attendance</h3>
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+    </div>
+    
+
+    </textarea>
+  </div>
+
+<script>
+
+      // submit form
+      
+      var Form = document.getElementById("formBox");
+      var actionInput = document.getElementById("action");
+      function Reject(){
+        actionInput.value = "reject";
+        Form.submit();
+
+      }
+
+
+
+</script>
+
+{% endblock %}

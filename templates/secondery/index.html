@@ -1,0 +1,174 @@
+{% extends "secondery/base.html" %}
+{% load filters %}
+{% block body %}
+
+{% if success %} <!-- employee successfully edited or added -->
+    <br>
+    <div class="alert alert-success" role="alert">
+      {{success_msg}}
+      <a href="{% url 'index' %}" class="alert-link">Go to Home Page.</a>
+    </div>
+{% else %} <!-- employee successfully edited or added {if action is not perfomed} -->
+
+<h3 class="m-4">Employee Information {% if 'app.employee' in perms %} 
+  <a href="{% url 'download-sheet' %}" id="downloadBtn" class="btn btn-secondary">
+    <i class="fa-solid fa-download fa-lg"></i> | <span id="downloadBtnText">Employee Sheet</span>
+  </a> 
+  {% else %}
+
+      {% if application_exists %}  <!-- check user have already requested for leave or not -->
+      <button class="btn btn-success">Already Requested</button>
+      {% else %} <!-- check user have already requested for leave or not(else) -->
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#applicationBox">Request For Leave</button>
+
+      <!-- Modal box for application -->
+      <div class="modal fade" id="applicationBox" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-body">
+              <form action="" method="post">{% csrf_token %}
+                <input type="hidden" name="action" value="leave_request">
+                <textarea name="application" class="applicationBox" placeholder="{{application}}" required>{{application}}</textarea>
+                <button class="btn btn-success">Confirm Request</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %} <!-- check user have already requested for leave or not -->
+  {% endif %}
+</h3>
+<div class="row">
+  <div class="col-12">
+    {% if 'app.employee' in perms %} <!-- check user is superuser or not -->
+    
+    {% if employees %} <!-- check employee Records empty or not -->
+    
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Position</th>
+                  <th scope="col">Department</th>
+                  <th scope="col">Phone Number</th>
+                  <th scope="col">Email Address</th>
+                  <th scope="col">Date of birth</th>
+                  <th scope="col">Address</th>
+                  <th scope="col">Date of join</th>
+                  <th scope="col">Total Att.</th>
+                  <th scope="col">Total Leave</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for employe in employees %}
+                  <tr>
+                    <th scope="row">
+                      <img src="{{employe.employee.image.url}}" alt="profile" class="employeeImg">
+                    </th>
+                    <td>{{employe.first_name}} {{employe.last_name}}</td>
+                    <td>{{employe.employee.position}}</td>
+                    <td>{{employe.employee.department}}</td>
+                    <td>{{employe.employee.number}}</td>
+                    <td>{{employe.email}}</td>
+                    <td>{{employe.employee.dof}}</td>
+                    <td>{{employe.employee.address}}</td>
+                    <td>{{employe.date_joined|date:"d M Y"}}</td>
+                    <td>{{employe.employee.total_attd}}</td>
+                    <td>{{employe.employee.total_leave}}</td>
+                    <td>
+                      <div class="btn-group" role="group" aria-label="Basic example">
+                        <a href="{% url 'check-attendance' %}?e={{employe.username}}" class="btn btn-success btnpadding">Attd.</a>
+                        <a href="?action=edit&id={{employe.username}}" class="btn btn-warning btnpadding"><i class="fa-solid fa-pen-to-square fa-lg"></i></a>
+
+                        <button type="button" class="btn btn-danger btnpadding" data-bs-toggle="modal" data-bs-target="#delete{{employe.id}}">
+                          <i class="fa-solid fa-trash-can fa-lg"></i>
+                        </button>
+
+                        
+                      </div>
+                      
+
+                      <!-- Modal - Delete Student -->
+                      <div class="modal" id="delete{{employe.id}}" tabindex="-1" aria-labelledby="myModalLabel2" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">
+                                Employee: {{ employe.first_name }} {{ employe.last_name }}
+                              </h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true"></span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <p>Are you sure you want to delete this student?</p>
+                            </div>
+                            <div class="modal-footer">
+                              <a class="btn btn-primary" href="?action=delete&id={{employe.username}}">Delete</a>
+                              
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          
+    {% else %} <!-- check employee Records empty or not -->
+      <h5 class="alert alert-primary ms-4 me-4">No Employee Records</h5>
+    {% endif %} <!-- check employee Records empty or not -->
+
+    {% else %} <!-- check user is superuser or not(else) -->
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              
+              <th scope="col">Name</th>
+              <th scope="col">Position</th>
+              <th scope="col">Department</th>
+              <th scope="col">Phone Number</th>
+              <th scope="col">Email Address</th>
+              <th scope="col">Date of birth</th>
+              <th scope="col">Address</th>
+              <th scope="col">Date of join</th>
+              <th scope="col">Total Att.</th>
+              <th scope="col">Total Leave</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                
+                <td>{{employe.first_name}} {{employe.last_name}}</td>
+                <td>{{employe.employee.position}}</td>
+                <td>{{employe.employee.department}}</td>
+                <td>{{employe.employee.number}}</td>
+                <td>{{employe.email}}</td>
+                <td>{{employe.employee.dof}}</td>
+                <td>{{employe.employee.address}}</td>
+                <td>{{employe.date_joined|date:"d M Y"}}</td>
+                <td>{{employe.employee.total_attd}}</td>
+                <td>{{employe.employee.total_leave}}</td>
+                
+              </tr>
+            
+          </tbody>
+        </table>
+        <br><br>
+        {% if application_exists.last.approved %}
+          <p style="color: green; font-size: 17px;"> *{{application_exists.last.leave_from|leave_request_update:application_exists.last.leave_to}} {{application_exists.last.admin_message}} </p>
+        {% endif %}
+        {% if application_exists.last.rejected %}
+          <p style="color: red; font-size: 17px;"> *{{application_exists.last.leave_from|leave_request_update:"rejected"}} {{application_exists.last.admin_message}} </p>
+        {% endif %}
+    {% endif %} <!-- check user is superuser or not -->
+  </div>
+</div>
+{% endif %} <!-- employee successfully edited or added -->
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "secondery/base.html" %}
+{% load static %}
+{% block body %}
+  
+    <div class="row justify-content-center m-5">
+      <div class="col-4">
+        <div class="card bg-light mb-3">
+          <div class="card-header">
+            <i class="fa-solid fa-address-card fa-lg"></i>
+            Employee Login Dashboard
+          </div>
+          <div class="card-body">
+            <form action="" method="POST">
+              {% csrf_token %}
+
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Employee ID</label> 
+                    <input type="name" name="id" class="form-control" id="id" placeholder="Exp- 2362442" required>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="mb-4">
+                    <label for="exampleFormControlInput1" class="form-label">Password</label> 
+                    <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                  </div>
+                </div>
+
+                
+
+            </div>
+            {% if error is not None %}
+            <span style="color: red;">{{error}}</span> <br><br>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Login Account</button>
+              
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+{% endblock %}
